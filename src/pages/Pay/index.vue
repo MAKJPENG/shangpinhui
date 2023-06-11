@@ -65,7 +65,7 @@
         <div class="hr"></div>
 
         <div class="submit">
-          <router-link class="btn" to="/paysuccess">立即支付</router-link>
+          <a class="btn" @click="open">立即支付</a>
         </div>
         <div class="otherpay">
           <div class="step-tit">
@@ -82,12 +82,15 @@
 </template>
 
 <script>
+import QRCode from 'qrcode'
 export default {
   name: 'Pay',
   data() {
     return {
       orderId: this.$route.query.orderId,
-      payInfo: {}
+      payInfo: {},
+      code: '',
+      timeId: null
     }
   },
   mounted() {
@@ -100,6 +103,52 @@ export default {
       if (res.code === 200) {
         this.payInfo = res.data
       }
+    },
+    // 弹窗
+    async open() {
+      // 生成二维码
+      const imgUrl = await QRCode.toDataURL(this.payInfo.codeUrl)
+      // 弹窗配置选项
+      this.$alert(`<img src=${imgUrl} >`, '请使用微信支付', {
+        dangerouslyUseHTMLString: true,
+        showClose: false,
+        showCancelButton: true,
+        cancelButtonText: '支付问题与帮助',
+        confirmButtonText: '已成功支付',
+        center: true,
+        beforeClose: (action, instance, done) => {
+          if (action === 'confirm') {
+            if (this.code === 200) {
+              clearInterval(this.timeId)
+              this.timeId = null
+              done()
+              this.$router.push('/paySuccess')
+            }
+          } else {
+            alert('订单遇到问题请联系客服')
+            clearInterval(this.timeId)
+            this.timeId = null
+            done()
+          }
+        }
+      })
+      let time = 0
+      // 发起查询订单是否支付成功
+      if (!this.timeId) {
+        this.timeId = setInterval(async () => {
+          time++
+          const res = await this.$API.reqPayStatus(this.orderId)
+          console.log(res)
+          if (res.code === 200 || time > 10) {
+            this.code = 200
+            clearInterval(this.timeId)
+            this.timeId = null
+            this.$msgbox.close()
+            this.$router.push('/paySuccess')
+          }
+        }, 1000);
+      }
+
     }
   }
 }

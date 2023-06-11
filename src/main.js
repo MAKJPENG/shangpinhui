@@ -2,12 +2,11 @@ import Vue from 'vue'
 import App from './App.vue'
 // 引入路由配置信息
 import router from '@/router'
-// 引入三级联动组件
+// 引入全局组件
 import TypeNav from '@/components/TypeNav'
-// 引入Carousel组件
 import Carousel from '@/components/Carousel'
-// 引入分页器Pagination组件
 import Pagination from '@/components/Pagination'
+import { Button, MessageBox } from 'element-ui'
 // 引入仓库
 import store from '@/store/index'
 
@@ -15,7 +14,7 @@ import store from '@/store/index'
 import '@/mock/mockServer'
 // 引入swiper的css文件
 import 'swiper/css/swiper.css'
-
+import 'element-ui/lib/theme-chalk/index.css'
 // 引入请求接口函数
 import * as API from '@/api'
 
@@ -23,6 +22,10 @@ import * as API from '@/api'
 Vue.component('TypeNav', TypeNav)
 Vue.component('Carousel', Carousel)
 Vue.component('Pagination', Pagination)
+Vue.component(Button.name, Button)
+Vue.prototype.$API = API
+Vue.prototype.$msgbox = MessageBox
+Vue.prototype.$alert = MessageBox.alert
 
 Vue.config.productionTip = false
 
@@ -31,7 +34,6 @@ new Vue({
   // 注册全局事件总线,请求接口
   beforeCreate() {
     Vue.prototype.$bus = this
-    Vue.prototype.$API = API
   },
   // 注册路由信息
   router,

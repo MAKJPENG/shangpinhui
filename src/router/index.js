@@ -13,6 +13,7 @@ import AddCartSuccess from '@/pages/AddCartSuccess'
 import ShopCart from '@/pages/ShopCart'
 import Trade from '@/pages/Trade'
 import Pay from '@/pages/Pay'
+import PaySuccess from '@/pages/PaySuccess'
 // 注册路由插件
 Vue.use(vueRouter)
 
@@ -43,6 +44,16 @@ const router = new vueRouter({
         return { y: 0 }
     },
     routes: [
+        // 支付成功页面路由
+        {
+            path: '/paySuccess',
+            name: 'paySuccess',
+            component: PaySuccess,
+            meta: {
+                //控制在这个路径footer组件是否隐藏
+                show: true,
+            }
+        },
         // 支付页面路由
         {
             path: '/pay',
