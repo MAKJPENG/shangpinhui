@@ -85,7 +85,9 @@ export default {
         // 登录成功后进行路由跳转
         const { phone, password } = this
         await this.$store.dispatch('user/userLogin', { phone, password })
-        this.$router.push({ path: '/home' })
+        // 判断是否有携带redirect参数
+        const toPath = this.$route.query.redirect || '/home'
+        this.$router.push({ path: toPath })
       } catch (error) {
         alert(error.message)
       }

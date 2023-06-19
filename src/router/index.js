@@ -4,7 +4,7 @@ import vueRouter from 'vue-router'
 import { getToken } from '@/utils/token'
 import store from '@/store'
 // 引入路由组件
-import Home from '@/pages/Home'
+/* import Home from '@/pages/Home'
 import Login from '@/pages/Login'
 import Register from '@/pages/Register'
 import Search from '@/pages/Search'
@@ -13,7 +13,7 @@ import AddCartSuccess from '@/pages/AddCartSuccess'
 import ShopCart from '@/pages/ShopCart'
 import Trade from '@/pages/Trade'
 import Pay from '@/pages/Pay'
-import PaySuccess from '@/pages/PaySuccess'
+import PaySuccess from '@/pages/PaySuccess' */
 // 注册路由插件
 Vue.use(vueRouter)
 
@@ -44,41 +44,76 @@ const router = new vueRouter({
         return { y: 0 }
     },
     routes: [
+        // 订单中心页面路由
+        {
+            path: '/center',
+            name: 'center',
+            component: () => import('@/pages/Center'),
+            meta: {
+                //控制在这个路径footer组件是否隐藏
+                show: true,
+            }
+        },
         // 支付成功页面路由
         {
             path: '/paySuccess',
             name: 'paySuccess',
-            component: PaySuccess,
+            component: () => import('@/pages/PaySuccess'),
             meta: {
                 //控制在这个路径footer组件是否隐藏
                 show: true,
+            },
+            beforeEnter: (to, from, next) => {
+                // 判断只有从pay才能进入该路由
+                if (from.path === '/pay') {
+                    next()
+                } else {
+                    next(false)
+                }
             }
         },
         // 支付页面路由
         {
             path: '/pay',
             name: 'pay',
-            component: Pay,
+            component: () => import('@/pages/Pay'),
             meta: {
                 //控制在这个路径footer组件是否隐藏
                 show: true,
+            },
+            beforeEnter: (to, from, next) => {
+                // 判断只有从trade才能进入该路由
+                console.log('111')
+                if (from.path === '/trade') {
+                    next()
+                } else {
+                    next(false)
+                }
             }
         },
         // 交易页面路由
         {
             path: '/trade',
             name: 'trade',
-            component: Trade,
+            component: () => import('@/pages/Trade'),
             meta: {
                 //控制在这个路径footer组件是否隐藏
                 show: true,
+            },
+            beforeEnter: (to, from, next) => {
+                // 判断只有从购物车才能进入该路由
+                if (from.path === '/shopcart') {
+                    next()
+                } else {
+                    next(false)
+                }
             }
         },
         // 详情页路由
         {
             path: '/detail/:goodId',
             name: 'detail',
-            component: Detail,
+            component: () => import('@/pages/Detail'),
             meta: {
                 //控制在这个路径footer组件是否隐藏
                 show: true,
@@ -88,17 +123,25 @@ const router = new vueRouter({
         {
             path: '/addcartsuccess',
             name: 'addcartsuccess',
-            component: AddCartSuccess,
+            component: () => import('@/pages/AddCartSuccess'),
             meta: {
                 //控制在这个路径footer组件是否隐藏
                 show: true,
+            },
+            beforeEnter: (to, from, next) => {
+                // 判断只有从购物车才能进入该路由
+                if (from.path.indexOf('/detail') != -1) {
+                    next()
+                } else {
+                    next(false)
+                }
             }
         },
         // 购物车路由
         {
             path: '/shopcart',
             name: 'shopcart',
-            component: ShopCart,
+            component: () => import('@/pages/ShopCart'),
             meta: {
                 //控制在这个路径footer组件是否隐藏
                 show: true,
@@ -107,7 +150,7 @@ const router = new vueRouter({
         // 首页路由信息
         {
             path: '/home',
-            component: Home,
+            component: () => import('@/pages/Home'),
             meta: {
                 //控制在这个路径footer组件是否隐藏
                 show: true,
@@ -117,7 +160,7 @@ const router = new vueRouter({
         {
             path: '/login',
             name: 'login',
-            component: Login,
+            component: () => import('@/pages/Login'),
             meta: {
                 show: false,
             }
@@ -126,7 +169,7 @@ const router = new vueRouter({
         // 注册路由信息
         {
             path: '/register',
-            component: Register,
+            component: () => import('@/pages/Register'),
             meta: {
                 show: false,
             }
@@ -135,7 +178,7 @@ const router = new vueRouter({
         {
             name: 'search',
             path: '/search/:keyword?',
-            component: Search,
+            component: () => import('@/pages/Search'),
             meta: {
                 show: true,
             }
@@ -182,7 +225,13 @@ router.beforeEach(async (to, from, next) => {
         }
     } else {
         // 没有登录,当访问到某些网页的时候就需要登录
-        next()
+        const toPath = to.path
+        if (toPath.indexOf('/trade') != -1 || toPath.indexOf('/pay') != -1 || toPath.indexOf('/paysuccess') != -1 || toPath.indexOf('/center') != -1) {
+            // 跳转到登录页面进行登录
+            next('/login?redirect=' + toPath)
+        } else {
+            next()
+        }
     }
 
 })

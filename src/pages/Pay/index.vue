@@ -118,12 +118,12 @@ export default {
         center: true,
         beforeClose: (action, instance, done) => {
           if (action === 'confirm') {
-            if (this.code === 200) {
+            // if (this.code === 200) {
               clearInterval(this.timeId)
               this.timeId = null
               done()
               this.$router.push('/paySuccess')
-            }
+            // }
           } else {
             alert('订单遇到问题请联系客服')
             clearInterval(this.timeId)
@@ -138,7 +138,6 @@ export default {
         this.timeId = setInterval(async () => {
           time++
           const res = await this.$API.reqPayStatus(this.orderId)
-          console.log(res)
           if (res.code === 200 || time > 10) {
             this.code = 200
             clearInterval(this.timeId)

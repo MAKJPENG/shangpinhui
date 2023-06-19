@@ -9,29 +9,28 @@
       <div class="content">
         <label>手机号:</label>
         <input type="text" placeholder="请输入你的手机号" v-model="phone">
-        <span class="error-msg">错误提示信息</span>
+        <span class="error-msg">{{ errorMessages.phone }}</span>
       </div>
       <div class="content">
         <label>验证码:</label>
         <input type="text" placeholder="请输入验证码" v-model="code">
-        <!-- <img ref="code" src="http://182.92.128.115/api/user/passport/code" alt="code"> -->
         <button style="width:70px;height:38px" @click="getCode">获取验证码</button>
-        <span class="error-msg">错误提示信息</span>
+        <span class="error-msg">{{ errorMessages.code }}</span>
       </div>
       <div class="content">
         <label>登录密码:</label>
         <input type="password" placeholder="请输入你的登录密码" v-model="password">
-        <span class="error-msg">错误提示信息</span>
+        <span class="error-msg">{{ errorMessages.password }}</span>
       </div>
       <div class="content">
         <label>确认密码:</label>
         <input type="password" placeholder="请输入确认密码" v-model="password1">
-        <span class="error-msg">错误提示信息</span>
+        <span class="error-msg">{{ errorMessages.password1 }}</span>
       </div>
       <div class="controls">
-        <input name="m1" type="checkbox" :checked="agree">
+        <input name="m1" type="checkbox" v-model="agree">
         <span>同意协议并注册《尚品汇用户协议》</span>
-        <span class="error-msg">错误提示信息</span>
+        <span class="error-msg">{{ errorMessages.agree }}</span>
       </div>
       <div class="btn">
         <button @click="doneRegister">完成注册</button>
@@ -66,7 +65,14 @@ export default {
       code: '',
       password: '',
       password1: '',
-      agree: true
+      agree: true,
+      errorMessages: {
+        phone: '',
+        code: '',
+        password: '',
+        password1: '',
+        agree: '',
+      },
     }
   },
   methods: {
@@ -81,23 +87,98 @@ export default {
     },
     // 完成注册
     async doneRegister() {
-      try {
-        // 结构赋值
-        const { phone, password, password1, code } = this
-        // 判断字段非空和前后密码是否相等
-        phone && password === password1 && code && await this.$store.dispatch('user/userRegister', { phone, password, code })
-        // 注册成功跳转路由
-         this.$router.push({
-           path: '/login',
-           query: {
-             phone
-           }
-         })
-      } catch (error) {
-        alert(error.message)
+      if (this.validateForm()) {
+        // 表单验证通过，执行注册逻辑
+        // ...
+        try {
+          // 结构赋值
+          const { phone, password, code } = this
+          // 判断字段非空和前后密码是否相等
+          await this.$store.dispatch('user/userRegister', { phone, password, code })
+          // 注册成功跳转路由
+          this.$router.push({
+            path: '/login',
+            query: {
+              phone
+            }
+          })
+        } catch (error) {
+          alert(error.message)
+        }
       }
-    }
-  }
+
+    },
+    // 校验整个表单
+    validateForm() {
+      for (let field in this.errorMessages) {
+        this.validateField(field);
+      }
+
+      for (let field in this.errorMessages) {
+        if (this.errorMessages[field] !== '') {
+          return false;
+        }
+      }
+
+      return true;
+    },
+    // 校验单个字段
+    validateField(field) {
+      this.errorMessages[field] = '';
+
+      switch (field) {
+        case 'phone':
+          if (!/^\d{11}$/.test(this.phone)) {
+            this.errorMessages.phone = '手机号码必须是11位数字';
+          }
+          break;
+
+        case 'code':
+          if (!/^\d{6}$/.test(this.code)) {
+            this.errorMessages.code = '验证码必须是六位数字';
+          }
+          break;
+
+        case 'password':
+          if (!/^[A-Za-z0-9]{8,16}$/.test(this.password)) {
+            this.errorMessages.password = '密码必须是8到16位数字或大小写字母';
+          }
+          break;
+
+        case 'password1':
+          if (this.password !== this.password1) {
+            this.errorMessages.password1 = '两次密码输入不一致';
+          }
+          break;
+
+        case 'agree':
+          if (!this.agree) {
+            this.errorMessages.agree = '请同意协议并注册';
+          }
+          break;
+
+        default:
+          break;
+      }
+    },
+  },
+  watch: {
+    phone() {
+      this.validateField('phone');
+    },
+    code() {
+      this.validateField('code');
+    },
+    password() {
+      this.validateField('password');
+    },
+    password1() {
+      this.validateField('password1');
+    },
+    agree() {
+      this.validateField('agree');
+    },
+  },
 }
 </script>
 

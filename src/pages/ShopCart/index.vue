@@ -57,7 +57,7 @@
           <i class="summoney">{{totalPrice()}}</i>
         </div>
         <div class="sumbtn">
-          <router-link class="sum-btn" to="/trade">结算</router-link>
+          <a class="sum-btn" @click="settlement">结算</a>
         </div>
       </div>
     </div>
@@ -159,6 +159,14 @@ export default {
       } catch (error) {
         error.message
       }
+    },
+    // 提交结算函数
+    settlement() {
+      if (this.isShopCartChecked) {
+        this.$router.push('/trade')
+      } else {
+        alert('没有商品被选中')
+      }
     }
   },
   computed: {
@@ -173,6 +181,16 @@ export default {
       return this.cartInfoList.every((cart) => {
         return cart.isChecked === 1
       })
+    },
+    // 计算是否有商品被选中
+    isShopCartChecked() {
+      let state
+      this.cartInfoList.forEach((cart) => {
+        if (cart.isChecked === 1) {
+          state = true
+        }
+      })
+      return state
     }
   },
 

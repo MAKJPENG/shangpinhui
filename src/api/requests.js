@@ -10,6 +10,7 @@ import 'nprogress/nprogress.css'
 const requests = axios.create({
     // 配置基础路径
     baseURL: '/api',
+    // baseURL: 'http://gmall-h5-api.atguigu.cn',
     // 配置请求超时
     timeout: 5000
 })
